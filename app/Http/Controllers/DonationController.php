@@ -1,65 +1,40 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use DB;
+use App\Models\DonationImages;
 use App\Models\Blogs;
 use App\Models\Category;
 use App\Models\Donations;
+use App\Http\Requests;
 use Illuminate\Http\Request;
 
-class DonationController extends Controller
-{
-    
-     public function __construct()
-    {
+class DonationController extends Controller {
+
+    public function __construct() {
         $this->middleware('auth');
     }
+
+    public function ajax_data() {
+        if (request()->ajax()) {
+            $cat_data = Category::select()->get();
+            return response()->json(array('data' => $cat_data));
+        }
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    
-     public function post_data()
-    {
-        return view('blogs.post');
-    }
-    
-    public function ajax_post(Request $request)
-    {
-        $posts = $request->post();
-        //print_r($posts);exit;
-        $data = new Blogs();
-        $data->user_id = $posts['user_id'];
-        $data->title = $posts['title'];
-        $data->description = $posts['description'];
-        $data->save();
-        
-    }
-    
-   public function ajax(Request $request)
-    {
-        
-       
-            $donation = $request->post();
-            //print_r($donation);exit;
-            $data = new Donations();
-            $data->user_id = $donation['user_id'];
-            $data->category_id = $donation['category_id'];
-            $data->city = $donation['city'];
-            $data->state = $donation['state'];
-            $data->save();
-           // return redirect('create');
-        
-    }
-    
-   
-        public function index_data()
-    {
+    public function index_data() {
         $user = Donations::select('*')
-                ->with('category')
-                ->paginate(5);
-       // print_r($user);exit;
-        return view('donations.show', ['users'=>$user]);
+                ->with('images')
+                ->paginate(10);
+        //print_r($user);exit;
+        return view('donations.show', ['users' => $user]);
+        //return response($user);
     }
 
     /**
@@ -67,10 +42,38 @@ class DonationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create_data()
-    {
-        $data = Category::select()->get();
-        return view('donations.create', ['data'=>$data]);
+    public function store_data(Request $request) {
+        if (request()->ajax()) {
+            $data = new Donations();
+            $data->user_id = $request['user_id'];
+            $data->category_id = $request['category_id'];
+            $data->city = $request['city'];
+            $data->state = $request['state'];
+            //print_r($request->all());exit;
+            $data->save();
+
+            if ($files = $request->file('image')) {
+
+                $m_id = Donations::findOrFail($data->id);
+                $path = public_path() . "/images/donation_image";
+                $priv = 0777;
+                if (!file_exists($path)) {
+                    mkdir($path, $priv) ? true : false; //
+                }
+                foreach ($files as $file) {
+                    $name = uniqid() . $file->getClientOriginalName();
+                    $file->move('images/donation_image', $name);
+                    $images = new DonationImages();
+                    $images->donation_id = $m_id->id;
+                    $images->image = '/images/donation_image/' . $name;
+                    $images->save();
+                }
+            }
+            $ids = [$images->id];
+            $img = DonationImages::where('id', $ids)->get();
+            //print_r($img);exit;
+            return response()->json(array('message' => 'success', 'data' => $data, 'image' => $img));
+        }
     }
 
     /**
@@ -79,47 +82,27 @@ class DonationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store_data(Request $request)
-    {
-        if($request->isMethod('post'))
-        {
-            $donation = $request->post();
-            $data = new Donations();
-            $data->user_id = $donation['user_id'];
-            $data->category_id = $donation['category_id'];
-            $data->city = $donation['city'];
-            $data->state = $donation['state'];
-            $data->save();
-            return redirect('create');
-        }
-    }
-
+//   
     /**
      * Display the specified resource.
-    public function store_data(Request $request)
-    {
-        if($request->isMethod('post'))
-        {
-            $donation = $request->post();
-            $data = new Donations();
-            $data->user_id = $donation['user_id'];
-            $data->category_id = $donation['category_id'];
-            $data->city = $donation['city'];
-            $data->state = $donation['state'];
-            $data->save();
-            return redirect('create');
-        }
-    }
 
-    /**
+
+      /**
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
+    public function show(Request $request) {
+        if (request()->ajax()) {
+            $data = Donations::where('id', $request->don_id)
+                    ->with('images')
+                    ->first();
+            //print_r($data);exit;
+            $cat = Category::select('*')->get();
+            //print_r($cat);exit;
+            return response()->json(array('data' => $data, 'cat' => $cat));
+        }
     }
 
     /**
@@ -128,9 +111,8 @@ class DonationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        //
+    public function edit(Request $request, $id) {
+        
     }
 
     /**
@@ -140,9 +122,40 @@ class DonationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request) {
+
+        if ($request->isMethod('post')) {
+            $posts = $request->post();
+            $data = Donations::find($posts['id']);
+            $data->id = $posts['id'];
+            $data->user_id = $posts['user_id'];
+            $data->category_id = $posts['category_id'];
+            $data->city = $posts['city'];
+            $data->state = $posts['state'];
+            $data->save();
+
+            if ($files = $request->file('image')) {
+
+                foreach ($files as $image) {
+                    $name = uniqid() . $image->getClientOriginalName();
+                    $image->move('images/donation_image', $name);
+                    if (isset($posts['image_id']) && $posts['image_id'] != '') {
+                        $images = DonationImages::find($posts['image_id']);
+                        $images->id = $posts['image_id'];
+                    } else {
+                        $images = new DonationImages;
+                    }
+                    $images->donation_id = $data->id;
+                    $images->image = '/images/donation_image/' . $name;
+                    ;
+                    $images->save();
+                }
+            }
+
+
+
+            return redirect('show');
+        }
     }
 
     /**
@@ -151,8 +164,16 @@ class DonationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        //
+    public function destroy(Request $request) {
+        if (request()->ajax()) {
+
+            $res = Donations::where('id', $request->ids)->delete();
+            if ($res) {
+                return response()->json(array('message' => 'success'));
+            } else {
+                return response()->json(array('message' => 'fail'));
+            }
+        }
     }
+
 }

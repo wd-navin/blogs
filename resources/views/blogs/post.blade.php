@@ -16,6 +16,9 @@
                     </ul>
                 </div>
                 <div class="card-body">
+                    <h3 class="my-3">
+                        Add blogs
+                    </h3>
                     <form method="post" action="javascript:void(0)" class="AddBlogForm">
                         @csrf
                         <div class="form-group">
@@ -26,7 +29,7 @@
                             <label for="exampleInputPassword1">Title</label>
                             <input type="text" name="title" class="form-control" id="exampleInputPassword1" placeholder="title">
                         </div>
-                         <div class="form-group">
+                        <div class="form-group">
                             <label for="exampleInputPassword1">Description</label>
                             <textarea class="form-control" name="description" rows="10" cols="50">
                                 

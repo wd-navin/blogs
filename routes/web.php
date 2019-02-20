@@ -20,20 +20,33 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::get('/post-show-data', 'BlogsController@index')->name('post-show-data');
+
+
+Route::get('/post', 'BlogsController@post_data')->name('post');
+Route::post('/ajax_post', 'BlogsController@ajax_post')->name('ajax_post');
+Route::get('delete/{id}', 'BlogsController@destroy')->name('delete');
+
+
+
+
 Route::get('/show', 'DonationController@index_data')->name('show');
+Route::post('/store_data', 'DonationController@store_data')->name('store_data');
+Route::post('ajax_list','DonationController@ajax_data')->name('ajax_list');
+Route::get('edit_data','DonationController@show')->name('edit_data');
+Route::post('update','DonationController@update')->name('update');
 
-Route::get('/post', 'DonationController@post_data')->name('post');
-Route::post('/ajax_post', 'DonationController@ajax_post')->name('ajax_post');
 
-Route::post('/store_data', 'DonationController@ajax')->name('store_data');
-
-Route::get('/create', 'DonationController@create_data')->name('create');
-Route::post('/store-data', 'DonationController@store_data')->name('store-data');
-
+//Route::get('/delete/{id}', 'DonationController@destroy')->name('delete');
+Route::delete('users', 'DonationController@destroy');
 
 Route::get('/view', 'CategoryController@index')->name('view');
 
 Route::get('add', 'CategoryController@create')->name('add');
+
 Route::post('store', 'CategoryController@store')->name('store');
+
+Route::delete('category', 'CategoryController@destroy');
+Route::post('cat_ajax', 'CategoryController@create_data')->name('cat_ajax');
 
 

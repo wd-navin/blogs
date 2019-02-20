@@ -1,4 +1,32 @@
 
+/*--model--*/
+.register-form input[type="text"], .register-form input[type="email"], .register-form input[type="password"] {
+    font-size: 16px;
+    color: #5a5656;
+    padding: 12px;
+    border: 0;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.45);
+    background: none;
+    outline: none;
+    margin-bottom: 18px;
+}
+h5#exampleModalLabel{
+    font-size: 24px;
+    color: #000;
+    font-weight: bold;
+}
+.btn-default{
+	background-color: black;
+	color: white;
+}
+.btn-default:hover{
+	color: #fff;
+}
+/*--//model--*/
+
+
+
 /* ..... FOOTER START ......*/
 /*
 body {

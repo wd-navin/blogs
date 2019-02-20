@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Category;
+use App\Models\data;
 
 use Illuminate\Http\Request;
 
@@ -16,11 +17,12 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Response    
      */
     public function index()
     {
-        $data = Category::select()->get();
+        $data = Category::with('freedata')->paginate(5);  
+        //print_r($data);exit;
        return view('category.view', ['data' => $data]); 
     }
 
@@ -29,26 +31,34 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create_data()
     {
-        return view('category.add');
+        if(request()->ajax())
+            {
+            $data = data::select()->get();
+            return response()->json(array('dataData' => $data));
+            }
     }
+    
+    
 
-    /**
-     * Store a newly created resource in storage.
+        /**
+         * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-       if($request->isMethod('post'))
+       if(request()->ajax())
        {
            $data = $request->post();
            $user = new Category();
            $user->product_name = $data['product_name'];
+           $user->data_id = $data['data_id'];
            $user->save();
-           return redirect('view');
+           //print_r($user);exit; 
+           return response()->json(array('message' => 'success', 'data' => $user));
        }
     }
 
@@ -92,8 +102,16 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        
+     if(request()->ajax()){
+         $data = Category::where('id', $request->catid)->delete();
+         if($data)
+             {
+             return response()->json(array('message' => 'success'));
+             }else{
+                 return response()->json(array('message' => 'fail'));
+             }
+     }
     }
 }

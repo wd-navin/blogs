@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class DeleteDonationImagesTable extends Migration
+class DropColumnImagesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,9 @@ class DeleteDonationImagesTable extends Migration
      */
     public function up()
     {
-        Schema::drop('donation_images');
+         Schema::table('images', function($table) {
+             $table->dropColumn('user_id');
+          });
     }
 
     /**

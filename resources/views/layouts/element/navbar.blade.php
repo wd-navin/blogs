@@ -38,6 +38,9 @@
                                     <a href="{{ route('view') }} " class="dropdown-item">
                                         {{ __('Category') }}
                                     </a>
+                                    <a href="{{  route('post-show-data') }}" class="dropdown-item">
+                                        {{ __('Blogs') }}
+                                    </a>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

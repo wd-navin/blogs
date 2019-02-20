@@ -20,7 +20,7 @@ class BlogsController extends Controller
     public function ajax_post(Request $request)
     {
         $posts = $request->post();
-        print_r($posts);exit;
+        //print_r($posts);exit;
         $data = new Blogs();
         $data->user_id = $posts['user_id'];
         $data->title = $posts['title'];
@@ -28,11 +28,14 @@ class BlogsController extends Controller
         $data->save();
         
     }
+    
+    
 
     
     public function index()
     {
-        //
+        $data = Blogs::select()->get();
+        return view('blogs.post_show_data', ['data'=>$data]);
     }
     
 
@@ -97,8 +100,11 @@ class BlogsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        //
+        $blogs = Blogs::find($id);
+        $blogs->delete();
+        return redirect('post-show-data');
+        
     }
 }
