@@ -18,10 +18,11 @@
         <!-- Styles -->
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
         <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+        <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet">
         <script src="{{ asset('js/app.js') }}" defer></script>
         <script src="{{ asset('js/jquery.min.js') }}"></script>
         <script src="{{ asset('js/ajax.js') }}"></script>
-        
+
     </head>
     <body>
         <div id="app">

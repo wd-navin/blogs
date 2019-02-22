@@ -60,11 +60,11 @@
             </div>
             <div class="modal-body">
                 <div class="register-form">
-                    <form action="javascript:void(0)" method="post" enctype="multipart/form-data">
+                    <form action="javascript:void(0)" method="post" enctype="multipart/form-data" class="UpdateData">
                         @csrf
                         <div class="fields-grid">
                             <div class="styled-input">
-                                <input type="text" name="id" id="donation-id" readonly="" class="form-control" id="exampleInputPassword1" >
+                                <input type="hidden" name="id" id="donation-id" readonly="" class="form-control" id="exampleInputPassword1" >
                             </div>
                             <div class="styled-input">
                                 <input type="hidden" name="user_id" id="user-id" value="{{ Auth::id() }}" readonly="" class="form-control" id="exampleInputPassword1" >
@@ -80,10 +80,13 @@
                             <div class="styled-input">
                                 <input type="text" name="state" id="state" placeholder="State"  class="form-control" id="exampleInputPassword1" >
                             </div>
-                            <div class="styled-input">
+                            <div class="styled-input" class="DonationImage">
                                 <input type="file" name="image[]" multiple=""   id="exampleInputPassword1" >
-                            </div>                            
-                            <button type="submit" class="btn btn-default sb_bttn  mt-3 " name="submit">Submit</button>
+                                <div class="viewimages">
+                                    
+                                </div>
+                             </div>                            
+                            <button type="submit" class="btn btn-default sb_bttn updateData  mt-3 " name="submit">Submit</button>
                         </div>
                     </form>
                 </div>

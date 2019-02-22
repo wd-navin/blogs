@@ -1,6 +1,6 @@
 $(document).ready(function () {
     ////// DONATION ////
-    
+
     //// GET DATA ///
     $('#donationModal').on('click', function () {
         $.ajax({
@@ -48,7 +48,6 @@ $(document).ready(function () {
                 });
                 $('.append').prepend('<tr>\n\
                 <th scope="row">' + data.data.id + '</th>\n\
-                <td>' + data.data.user_id + '</td>\n\
                 <td>' + data.data.category_id + '</td>\n\
                 <td>' + data.data.city + '</td>\n\
                 <td>' + data.data.state + '</td>\n\
@@ -57,6 +56,23 @@ $(document).ready(function () {
                 Delete </button> \n\
                 <a href="http://blogs.local/edit_data/' + data.data.id + '" class="btn btn-danger btn-sm">Edit</a>\n\
                 </td></tr>');
+                $('.cardappend').prepend('<div class="col-md-3  col-sm-6">\n\
+<div class="product-grid">\n\
+<div class="product-image">\n\
+<img src="'+data.image[0].image+'" width="50"> \n\
+</div>\n\
+ <div class="product-content">\n\
+<h3 class="title">\n\
+<a href="#" style="color: rgb(0, 0, 0);">Sweeters </a>\n\
+</h3>\n\
+ <div class="price">\n\
+<p>delhi</p>\n\
+</div>\n\
+ <div class="price">\n\
+<p>Uttrakhand</p>\n\
+</div>\n\
+</div>\n\
+</div></div>')
             }
         });
     });
@@ -68,7 +84,7 @@ $(document).ready(function () {
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            url: "users",
+            url: webUrl + "/users_destroy",
             type: 'DELETE',
             data: {ids: id},
             dataType: 'json',
@@ -82,19 +98,50 @@ $(document).ready(function () {
             }
         });
     });
-    
-    /////..... EDIT DATA .... ////
-    $('.editrecord').on('click',function(){
-        var d_id = $(this).attr('edit-data-id');        
+
+    ///... delete image..///
+    $('.deleteImage').on('click', function () {
+        var image_id = $(this).attr('img_id');
+        //alert(image_id); return false;
+
         $.ajax({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
+            url: webUrl + '/del_image',
+            type: 'DELETE',
+            data: {id: image_id},
+            dataType: 'json',
+            context: this,
+            success: function (data) {
+                if (data.message == 'success')
+                {
+                    $(this).parent('div').remove();
+                    //$(this).parent('div').remove();
+                } else {
+                    alert(data.message);
+                }
+            }
+
+        });
+    });
+
+    /////..... EDIT/GET DATA .... ////
+    var myarray = [];
+    $(document).on('click', '.editrecord', function () {
+
+        myarray.push($(this).parents('tr').html());
+        var d_id = $(this).attr('edit-data-id');
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            enctype: 'multipart/form-data',
             url: webUrl + '/edit_data',
             type: 'get',
-            data:{don_id:d_id },
-            dataType:'json',
-            success: function (response){
+            data: {don_id: d_id},
+            dataType: 'json',
+            success: function (response) {
                 $('#EditDonationModal').modal('show');
                 $('#category-id').html('');
                 // get fields values
@@ -102,16 +149,65 @@ $(document).ready(function () {
                 $('#user-id').val(response.data.user_id);
                 $('#user-city').val(response.data.city);
                 $('#state').val(response.data.state);
-                $.each(response.cat , function(key, val) {
-                    $('#category-id').append('<option value="'+val.id+'">'+ val.product_name+'</option>');
+                $.each(response.cat, function (key, val) {
+                    response.data.category_id == val.id
+                            ? $('#category-id').append('<option value="' + val.id + '" selected>' + val.product_name + '</option>')
+
+                            : $('#category-id').append('<option value="' + val.id + '" >' + val.product_name + '</option>')
+
                 });
-                
+
+
+                var myarray = [];
+                $('.viewimages').html('');
+                $.each(response.image, function (key, val) {
+                    $('.viewimages').append('<img src="' + val.img + '" width="50"/>')
+                });
+
+
             }
-    });
+        });
     });
 
+    ///////......... UPDATE DATA ...../////
+
+    $('.UpdateData').submit(function () {
+        var image = $('.UpdateData')[0];
+        var images = new FormData(image);
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            enctype: 'multipart/form-data',
+            url: webUrl + '/update',
+            type: 'POST',
+            data: images,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            context: this,
+            success: function (data) {
+                console.log($('#' + data.data.id))
+                $('#EditDonationModal').modal('hide');
+                $('#' + data.data.id).find('#city-id').html(data.data.city);
+                $('#' + data.data.id).find('#state-id').html(data.data.state);
+                $('#' + data.data.id).find('#cat-id').html(data.data.category_id);
+                $('#' + data.data.id).find('.appendImges').html('');
+                $.each(data.image, function (key, val) {
+                    $('#' + data.data.id).find('.appendImges').append('<img src="' + webUrl + val.image + '" width="50">')
+
+                });
+                // get fields values
+
+
+            }
+        });
+    });
+
+
+
     ///////  CATEGORY AJAX ///////
-    
+
     /////// GET DATA /////////
     $("#CategoryAddData").on('click', function () {
         $("#CategoryModal").modal('show');
@@ -119,19 +215,19 @@ $(document).ready(function () {
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            url:webUrl + '/cat_ajax',
-            type:'post',
-            dataType:'json',
-            success: function(data){
+            url: webUrl + '/cat_ajax',
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
                 $('.catData').html('');
-                $.each(data.dataData, function(key, val){
-                    $('.catData').append('<option value="'+ val.id +'">'+ val.name +'</option>');
+                $.each(data.dataData, function (key, val) {
+                    $('.catData').append('<option value="' + val.id + '">' + val.name + '</option>');
                 });
-                               
+
             }
-            
-        
-    });
+
+
+        });
     });
 
     /////// ADD DATA /////////
@@ -159,8 +255,8 @@ $(document).ready(function () {
             }
         });
     });
-       
-       /////// DELETE DATA /////////
+
+    /////// DELETE DATA /////////
     $(document).on('click', '.cat_delete', function () {
         var cat_id = $(this).attr('cat-id');
         $.ajax({
@@ -181,9 +277,9 @@ $(document).ready(function () {
             }
         });
     });
-    
+
     /////// UPDATE DATA /////////
-    
+
 
     //////////////////
 
